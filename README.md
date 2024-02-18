@@ -43,7 +43,7 @@ dfx start --background --clean
 ## Contributions
 Please feel free to start an issue or send a pull request if you discover any bugs, have ideas, or would like to add new functionality.
 
-## Lincense
+## License
 This project is licensed under the MIT License.
 
 
