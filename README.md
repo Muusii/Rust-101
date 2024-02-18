@@ -21,4 +21,30 @@ This real estate canister is a decentalized ICP canister that provides both quer
 ```
 https://github.com/Muusii/Rust-101.git
 ```
-  
+```
+cd Rust-101
+```
++View the code:
+```
+code .
+```
++Start the canister:
+```
+dfx start --background
+```
++Deploy the canister:
+```
+npm run gen-deploy
+```
++Update changes:
+```
+dfx start --background --clean
+```
+## Contributions
+Please feel free to start an issue or send a pull request if you discover any bugs, have ideas, or would like to add new functionality.
+
+##Lincense
+This project is licensed under the MIT License.
+
+
+
