@@ -17,5 +17,6 @@ This real estate canister is a decentalized ICP canister that provides both quer
 - [Introduction to Candid](https://internetcomputer.org/docs/current/developer-docs/backend/candid)
 
 ## Running Canister
-+ Clone my repo
++ Clone my repository:
+  //https://github.com/Muusii/Rust-101 .git
   
