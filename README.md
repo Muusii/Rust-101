@@ -24,19 +24,19 @@ https://github.com/Muusii/Rust-101.git
 ```
 cd Rust-101
 ```
-+View the code:
++ View the code:
 ```
 code .
 ```
-+Start the canister:
++ Start the canister:
 ```
 dfx start --background
 ```
-+Deploy the canister:
++ Deploy the canister:
 ```
 npm run gen-deploy
 ```
-+Update changes:
++ Update changes:
 ```
 dfx start --background --clean
 ```
