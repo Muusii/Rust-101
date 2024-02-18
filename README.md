@@ -1,4 +1,4 @@
-# icp_rust_message_board_contract
+# Real Estate Canister
 
 ### Requirements
 * rustc 1.64 or higher
