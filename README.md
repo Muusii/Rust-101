@@ -9,7 +9,7 @@ This real estate canister is a decentalized ICP canister that provides both quer
 + Verify owners of properties.
 
 ### Getting Started
-+https://internetcomputer.org/docs/current/developer-docs/getting-started/deploy/local
+[Start](https://internetcomputer.org/docs/current/developer-docs/getting-started/deploy/local)
 * rustc 1.64 or higher
 ```bash
 $ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
