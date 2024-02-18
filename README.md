@@ -19,7 +19,7 @@ This real estate canister is a decentalized ICP canister that provides both quer
 ## Running Canister
 + Clone my repository:
 ```
-https://github.com/Muusii/Rust-101.git
+git clone https://github.com/Muusii/Rust-101.git
 ```
 ```
 cd Rust-101
