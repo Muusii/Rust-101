@@ -1,0 +1,23 @@
+type Error = variant { NotFound : record { msg : text } };
+type Property = record {
+  id : nat64;
+  owner : opt text;
+  description : text;
+  address : text;
+  price : float64;
+};
+type PropertyPayload = record {
+  description : text;
+  address : text;
+  price : float64;
+};
+type Result = variant { Ok : Property; Err : Error };
+type Result_1 = variant { Ok : vec Property; Err : Error };
+service : {
+  add_property : (PropertyPayload) -> (Result);
+  delete_property : (nat64) -> (Result);
+  get_properties : () -> (Result_1) query;
+  get_property_by_id : (nat64) -> (Result) query;
+  transfer_property_ownership : (nat64, text) -> (Result);
+  update_property : (nat64, PropertyPayload) -> (Result);
+}
