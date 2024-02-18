@@ -1,6 +1,13 @@
 # Real Estate Canister
 ## Overview
 This real estate canister is a decentalized ICP canister that provides both query and update functionalities to interface with property data, making it a strong solution for managing properties on the Internet Computer platform.
+
+## Features
++ Create,Update and delete properties.
++ Management of property.
++ Read available properties.
++ Verify owners of properties.
+
 ### Requirements
 * rustc 1.64 or higher
 ```bash
