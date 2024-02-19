@@ -1,12 +1,16 @@
-type Error = variant { NotFound : record { msg : text } };
+type Error = variant {
+  NotFound : record { msg : text };
+  Unauthorized : record { msg : text };
+};
 type Property = record {
   id : nat64;
-  owner : opt text;
+  owner_public_key : vec nat8;
   description : text;
   address : text;
   price : float64;
 };
 type PropertyPayload = record {
+  owner_public_key : vec nat8;
   description : text;
   address : text;
   price : float64;
@@ -18,6 +22,6 @@ service : {
   delete_property : (nat64) -> (Result);
   get_properties : () -> (Result_1) query;
   get_property_by_id : (nat64) -> (Result) query;
-  transfer_property_ownership : (nat64, text) -> (Result);
+  transfer_property_ownership : (nat64, vec nat8) -> (Result);
   update_property : (nat64, PropertyPayload) -> (Result);
 }

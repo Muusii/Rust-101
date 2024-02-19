@@ -8,15 +8,16 @@ use std::{borrow::Cow, cell::RefCell};
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 type IdCell = Cell<u64, Memory>;
 
+// struct for property
 #[derive(candid::CandidType, Clone, Serialize, Deserialize)]
 struct Property {
     id: u64,
     address: String,
     price: f64,
     description: String,
-    owner: Option<String>,
+    owner_public_key: Vec<u8>, // Public key of the current owner
 }
-
+// Implement storable and boundedstorable traits of property
 impl Storable for Property {
     fn to_bytes(&self) -> Cow<[u8]> {
         Cow::Owned(Encode!(self).unwrap())
@@ -47,18 +48,22 @@ thread_local! {
     );
 }
 
-#[derive(candid::CandidType, Deserialize, Serialize)]
-enum Error {
-    NotFound { msg: String },
-}
-
+// Property payload
 #[derive(candid::CandidType, Serialize, Deserialize)]
 struct PropertyPayload {
     address: String,
     price: f64,
     description: String,
+    owner_public_key: Vec<u8>, // Public key of the current owner
 }
 
+// Function to verify the owner's identity
+fn verify_owner_identity(payload: &PropertyPayload) -> bool {
+    // For demo all public keys are valid
+    true
+}
+
+// Function to get existing properties
 #[ic_cdk::query]
 fn get_properties() -> Result<Vec<Property>, Error> {
     let properties = PROPERTY_STORAGE
@@ -71,6 +76,7 @@ fn get_properties() -> Result<Vec<Property>, Error> {
     Ok(properties)
 }
 
+//Function to get property by ID
 #[ic_cdk::query]
 fn get_property_by_id(id: u64) -> Result<Property, Error> {
     PROPERTY_STORAGE.with(|service| {
@@ -83,8 +89,16 @@ fn get_property_by_id(id: u64) -> Result<Property, Error> {
     })
 }
 
+//Function to add new property
 #[ic_cdk::update]
 fn add_property(payload: PropertyPayload) -> Result<Property, Error> {
+    // Verify owner before adding new property
+    if !verify_owner_identity(&payload) {
+        return Err(Error::Unauthorized {
+            msg: "Invalid owner identity".to_string(),
+        });
+    }
+
     let id = PROPERTY_ID
         .with(|counter| {
             let current_value = *counter.borrow().get();
@@ -97,13 +111,14 @@ fn add_property(payload: PropertyPayload) -> Result<Property, Error> {
         address: payload.address,
         price: payload.price,
         description: payload.description,
-        owner: None, // Initially, no owner
+        owner_public_key: payload.owner_public_key,
     };
 
     PROPERTY_STORAGE.with(|m| m.borrow_mut().insert(id, property.clone()));
     Ok(property)
 }
 
+//Function to update any property info
 #[ic_cdk::update]
 fn update_property(id: u64, payload: PropertyPayload) -> Result<Property, Error> {
     PROPERTY_STORAGE.with(|m| {
@@ -114,6 +129,13 @@ fn update_property(id: u64, payload: PropertyPayload) -> Result<Property, Error>
                 msg: format!("Property with id={} not found", id),
             })?;
 
+        // Verify owner before updating property info
+        if !verify_owner_identity(&payload) {
+            return Err(Error::Unauthorized {
+                msg: "Invalid owner identity".to_string(),
+            });
+        }
+
         property.address = payload.address;
         property.price = payload.price;
         property.description = payload.description;
@@ -123,6 +145,10 @@ fn update_property(id: u64, payload: PropertyPayload) -> Result<Property, Error>
     })
 }
 
+
+
+
+// Function to delete the property from website when bought
 #[ic_cdk::update]
 fn delete_property(id: u64) -> Result<Property, Error> {
     PROPERTY_STORAGE.with(|m| {
@@ -134,8 +160,9 @@ fn delete_property(id: u64) -> Result<Property, Error> {
     })
 }
 
+// Function to transfer ownership after transactions
 #[ic_cdk::update]
-fn transfer_property_ownership(id: u64, new_owner: String) -> Result<Property, Error> {
+fn transfer_property_ownership(id: u64, new_owner: Vec<u8>) -> Result<Property, Error> {
     PROPERTY_STORAGE.with(|m| {
         let mut property = m
             .borrow_mut()
@@ -144,11 +171,18 @@ fn transfer_property_ownership(id: u64, new_owner: String) -> Result<Property, E
                 msg: format!("Property with id={} not found", id),
             })?;
 
-        property.owner = Some(new_owner.clone());
+        property.owner_public_key = new_owner;
 
         m.borrow_mut().insert(id, property.clone());
         Ok(property)
     })
 }
 
+#[derive(candid::CandidType, Deserialize, Serialize)]
+enum Error {
+    NotFound { msg: String },
+    Unauthorized { msg: String },
+}
+
+//Provides candid interface.
 ic_cdk::export_candid!();

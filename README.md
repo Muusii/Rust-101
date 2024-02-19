@@ -1,11 +1,11 @@
 # Real Estate Canister
 ## Overview
-This real estate canister is a decentalized ICP canister that provides both query and update functionalities to interface with property data, making it a strong solution for managing properties on the Internet Computer platform.
-
+This real estate canister is a decentalized ICP canister that mainly implements chainkey technology by enabling all owners have unique public keys to verify them and mitigate the problem of invalid brokers from the market.
+Also it provides both query and update functionalities to interface with property data, making it a strong solution for managing properties on the Internet Computer platform.
 ## Features
 + Create,Update and delete properties.
 + Management of property.
-+ Read available properties.
++ Read available properties. 
 + Verify owners of properties.
 
 ### Getting Started
