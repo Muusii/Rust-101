@@ -58,7 +58,7 @@ struct PropertyPayload {
 }
 
 // Function to verify the owner's identity
-fn verify_owner_identity(payload: &PropertyPayload) -> bool {
+fn verify_owner_identity(_payload: &PropertyPayload) -> bool {
     // For demo all public keys are valid
     true
 }
