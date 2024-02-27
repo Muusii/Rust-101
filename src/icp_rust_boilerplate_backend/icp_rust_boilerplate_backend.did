@@ -1,6 +1,7 @@
 type Error = variant {
   NotFound : record { msg : text };
   Unauthorized : record { msg : text };
+  Validate : record { msg : text };
 };
 type Property = record {
   id : nat64;

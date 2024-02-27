@@ -3,6 +3,7 @@ extern crate serde;
 use candid::{Decode, Encode};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{BoundedStorable, Cell, DefaultMemoryImpl, StableBTreeMap, Storable};
+use std::fmt::write;
 use std::{borrow::Cow, cell::RefCell};
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
@@ -66,8 +67,12 @@ fn verify_owner_identity(_payload: &PropertyPayload) -> bool {
 // Function to get existing properties
 #[ic_cdk::query]
 fn get_properties() -> Result<Vec<Property>, Error> {
-    let properties = PROPERTY_STORAGE
-        .with(|m| m.borrow().iter().map(|(_, v)| v.clone()).collect::<Vec<_>>());
+    let properties = PROPERTY_STORAGE.with(|m| {
+        m.borrow()
+            .iter()
+            .map(|(_, v)| v.clone())
+            .collect::<Vec<_>>()
+    });
     if properties.len() == 0 {
         return Err(Error::NotFound {
             msg: "No properties found".to_string(),
@@ -80,18 +85,26 @@ fn get_properties() -> Result<Vec<Property>, Error> {
 #[ic_cdk::query]
 fn get_property_by_id(id: u64) -> Result<Property, Error> {
     PROPERTY_STORAGE.with(|service| {
-        service
-            .borrow_mut()
-            .get(&id)
-            .ok_or(Error::NotFound {
-                msg: format!("Property with id={} not found", id),
-            })
+        service.borrow_mut().get(&id).ok_or(Error::NotFound {
+            msg: format!("Property with ID = {} not found", id),
+        })
     })
 }
 
 //Function to add new property
 #[ic_cdk::update]
 fn add_property(payload: PropertyPayload) -> Result<Property, Error> {
+    //Simple validation to ensure no fields are left empty
+    if payload.owner_public_key.is_empty()
+        || payload.address.is_empty()
+        || payload.description.is_empty()
+        || payload.price.is_nan()
+    {
+        return Err(Error::Validate {
+            msg: "Please fill in all the required fields".to_string(),
+        });
+    }
+
     // Verify owner before adding new property
     if !verify_owner_identity(&payload) {
         return Err(Error::Unauthorized {
@@ -121,13 +134,17 @@ fn add_property(payload: PropertyPayload) -> Result<Property, Error> {
 //Function to update any property info
 #[ic_cdk::update]
 fn update_property(id: u64, payload: PropertyPayload) -> Result<Property, Error> {
+    //Simple validation to ensure no fields are left
+    if payload.address.is_empty() & payload.price.is_nan() & payload.description.is_empty() {
+        return Err(Error::Validate {
+            msg: "You cannot leave all leave all fields empty".to_string(),
+        });
+    }
+
     PROPERTY_STORAGE.with(|m| {
-        let mut property = m
-            .borrow_mut()
-            .get(&id)
-            .ok_or(Error::NotFound {
-                msg: format!("Property with id={} not found", id),
-            })?;
+        let mut property = m.borrow_mut().get(&id).ok_or(Error::NotFound {
+            msg: format!("Property with id = {} not found ", id),
+        })?;
 
         // Verify owner before updating property info
         if !verify_owner_identity(&payload) {
@@ -145,18 +162,13 @@ fn update_property(id: u64, payload: PropertyPayload) -> Result<Property, Error>
     })
 }
 
-
-
-
 // Function to delete the property from website when bought
 #[ic_cdk::update]
 fn delete_property(id: u64) -> Result<Property, Error> {
     PROPERTY_STORAGE.with(|m| {
-        m.borrow_mut()
-            .remove(&id)
-            .ok_or(Error::NotFound {
-                msg: format!("Property with id={} not found", id),
-            })
+        m.borrow_mut().remove(&id).ok_or(Error::NotFound {
+            msg: format!("Property with id = {} not found", id),
+        })
     })
 }
 
@@ -164,12 +176,9 @@ fn delete_property(id: u64) -> Result<Property, Error> {
 #[ic_cdk::update]
 fn transfer_property_ownership(id: u64, new_owner: Vec<u8>) -> Result<Property, Error> {
     PROPERTY_STORAGE.with(|m| {
-        let mut property = m
-            .borrow_mut()
-            .get(&id)
-            .ok_or(Error::NotFound {
-                msg: format!("Property with id={} not found", id),
-            })?;
+        let mut property = m.borrow_mut().get(&id).ok_or(Error::NotFound{ 
+            msg: format!("Property with id = {} not found", id)
+        })?;
 
         property.owner_public_key = new_owner;
 
@@ -178,8 +187,9 @@ fn transfer_property_ownership(id: u64, new_owner: Vec<u8>) -> Result<Property, 
     })
 }
 
-#[derive(candid::CandidType, Deserialize, Serialize)]
+#[derive(candid::CandidType, Deserialize, Serialize, Debug)]
 enum Error {
+    Validate { msg: String },
     NotFound { msg: String },
     Unauthorized { msg: String },
 }
